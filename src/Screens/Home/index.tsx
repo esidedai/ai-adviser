@@ -104,11 +104,16 @@ const streamConversation = async (threadId: string | null, input: string) => {
               const parsedContent = JSON.parse(jsonString);
               completeMessage += parsedContent.content;
 
-              setTypedResponse(completeMessage);
+              // Check if "undefined" is at the end and remove it
+              const cleanedMessage = completeMessage.endsWith("undefined")
+                ? completeMessage.slice(0, -9).trim()
+                : completeMessage.trim();
+
+              setTypedResponse(cleanedMessage);
               setConversations((prevConversations) => {
                 return prevConversations.map((conversation) =>
                   conversation.prompt === input
-                    ? { ...conversation, response: completeMessage, isLoading: true }
+                    ? { ...conversation, response: cleanedMessage, isLoading: true }
                     : conversation
                 );
               });
@@ -152,45 +157,51 @@ const streamConversation = async (threadId: string | null, input: string) => {
     }
   }, [currentResponse]);
 
-  const continueConversation = async (
-    threadId: string | null,
-    input: string
-  ) => {
-    setConversations((prevConversations) => [
-      ...prevConversations,
-      { prompt: input, response: "", isLoading: true },
-    ]);
-    setSearchTerm("");
-    try {
-      const response = await axios.post(
-        "https://ti.aitaskmasters.net/venturityadviser/api/response",
-        { threadId, input },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+const continueConversation = async (
+  threadId: string | null,
+  input: string
+) => {
+  setConversations((prevConversations) => [
+    ...prevConversations,
+    { prompt: input, response: "", isLoading: true },
+  ]);
+  setSearchTerm("");
+  try {
+    const response = await axios.post(
+      "https://ti.aitaskmasters.net/venturityadviser/api/response",
+      { threadId, input },
+      {
+        headers: {
+          "Content-Type": "application/json",
         }
+      }
+    );
+
+    console.log("Prompt: ", input);
+    console.log("Response: ", response.data);
+    const responseData = response.data.response.value;
+
+    // Check if "undefined" is at the end and remove it
+    const cleanedResponse = responseData.endsWith("undefined")
+      ? responseData.slice(0, -9).trim()
+      : responseData.trim();
+
+    setConversations((prevConversations) => {
+      return prevConversations.map((conversation) =>
+        conversation.prompt === input
+          ? { ...conversation, response: cleanedResponse, isLoading: false }
+          : conversation
       );
+    });
+    setCurrentResponse(cleanedResponse);
+    setTypedResponse("");
+  } catch (error) {
+    console.error("Error continuing conversation:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      console.log("Prompt: ", input);
-      console.log("Response: ", response.data);
-      const responseData = response.data.response.value;
-
-      setConversations((prevConversations) => {
-        return prevConversations.map((conversation) =>
-          conversation.prompt === input
-            ? { ...conversation, response: responseData, isLoading: false }
-            : conversation
-        );
-      });
-      setCurrentResponse(responseData);
-      setTypedResponse("");
-    } catch (error) {
-      console.error("Error continuing conversation:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (currentResponse) {
