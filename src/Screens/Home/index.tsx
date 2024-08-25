@@ -35,7 +35,7 @@ const Home: React.FC = () => {
     if (!threadId) {
       try {
         const response = await axios.post(
-          "https://ti.aitaskmasters.net/thebotique/api/new-thread",
+          "https://ti.aitaskmasters.net/venturity-adviser/api/new-thread",
           {},
           {
             headers: {
@@ -69,7 +69,7 @@ const streamConversation = async (threadId: string | null, input: string) => {
   setSearchTerm("");
 
   try {
-    const response = await fetch("https://ti.aitaskmasters.net/thebotique/api/stream-response", {
+    const response = await fetch("https://ti.aitaskmasters.net/venturity-adviser/api/stream-response", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -163,7 +163,7 @@ const streamConversation = async (threadId: string | null, input: string) => {
     setSearchTerm("");
     try {
       const response = await axios.post(
-        "https://ti.aitaskmasters.net/thebotique/api/response",
+        "https://ti.aitaskmasters.net/venturity-adviser/api/response",
         { threadId, input },
         {
           headers: {
@@ -218,7 +218,7 @@ const streamConversation = async (threadId: string | null, input: string) => {
           {!hasSearched ? (
             <div className="text-center mb-12">
               <h1 className="text-5xl font-bold text-black mb-5 bg-custom-gradient">
-                Greg Alexander - The Boutique in Action
+                Welcome to Venturity Adviser
               </h1>
               <div className="flex justify-center items-center">
                 <input
